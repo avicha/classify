@@ -30,8 +30,5 @@ class Instances {
         this.dataset = this.dataset.filter(instance => instance.get(this.classAttr) != null);
         return this;
     }
-    prepare() {
-
-    }
 }
 module.exports = Instances;

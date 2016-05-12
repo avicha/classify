@@ -1,19 +1,19 @@
-class OneRRule {
+class newNominalRule {
     constructor(attr, instances) {
         this.classifications = new Map();
         this.correct = 0;
         this.attrResult = new Map();
-        for (let val of attr.values) {
+        for (let attrVal of attr.values) {
             let classValInfo = new Map();
             for (let classVal of instances.classAttr.values) {
                 classValInfo.set(classVal, 0);
             }
-            this.attrResult.set(val, classValInfo);
+            this.attrResult.set(attrVal, classValInfo);
         }
         instances.dataset.forEach(instance => {
-            let value = instance.get(attr);
+            let attrVal = instance.get(attr);
             let classVal = instance.get(instances.classAttr);
-            this.attrResult.get(value).set(classVal, this.attrResult.get(value).get(classVal) + 1);
+            this.attrResult.get(attrVal).set(classVal, this.attrResult.get(attrVal).get(classVal) + 1);
         });
         for (let [attrVal, classValInfo] of this.attrResult) {
             let bestVal, count = 0;
@@ -39,7 +39,7 @@ class OneRClassifier {
         this.rule = null;
     }
     newRule(attr, instances) {
-        let r = new OneRRule(attr, instances);
+        let r = new newNominalRule(attr, instances);
         return r;
     }
     buildClassifier(instances) {
