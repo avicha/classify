@@ -1,9 +1,14 @@
 let OneRClassifier = require('./OneRClassifier.js');
 let Instances = require('./Instances.js');
+let Attribute = require('./Attribute.js');
 let classifer = new OneRClassifier();
-let instances = new Instances('weather');
-instances.setAttributes('outlook', 'temperature', 'humidity', 'windy', 'play');
-instances.setClassAttribute('play');
+let attr1 = new Attribute('outlook', new Set(['sunny', 'overcast', 'rainy']));
+let attr2 = new Attribute('temperature', new Set(['hot', 'mild', 'cool']));
+let attr3 = new Attribute('humidity', new Set(['high', 'normal']));
+let attr4 = new Attribute('windy', new Set([true, false]));
+let attr5 = new Attribute('play', new Set([true, false]));
+let instances = new Instances('weather', [attr1, attr2, attr3, attr4, attr5]);
+instances.setClassAttribute(attr5);
 instances.addInstance({
     outlook: 'sunny',
     temperature: 'hot',

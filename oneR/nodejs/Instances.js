@@ -1,17 +1,18 @@
 let Instance = require('./Instance.js');
-let Attribute = require('./Attribute.js');
 class Instances {
-    constructor(relation) {
+    constructor(relation, attrs) {
         this.relation = relation;
-        this.attrs = [];
+        this.attrs = attrs;
+        this.numAttributes = attrs.length;
+        for (let i = 0; i < this.numAttributes; i++) {
+            this.attribute(i).setIndex(i);
+        }
+        this.classAttr = null;
+        this.classAttrIndex = -1;
         this.dataset = [];
     }
-    setAttributes(...attrs) {
-        attrs.forEach(attr => this.attrs.push(new Attribute(attr)));
-        return this;
-    }
     setClassAttribute(classAttr) {
-        let classAttrIndex = this.attrs.findIndex(attr => attr.name == classAttr);
+        let classAttrIndex = this.attrs.findIndex(attr => attr == classAttr);
         if (~classAttrIndex) {
             this.classAttr = this.attrs[classAttrIndex];
             this.classAttrIndex = classAttrIndex;
@@ -19,15 +20,17 @@ class Instances {
         }
         throw new Exception(classAttr + ' is not exists');
     }
+    attribute(i) {
+        return this.attrs[i];
+    }
     addInstance(instance) {
         let instanceObj = new Instance(instance);
-        instanceObj.setAttributes(this.attrs);
-        this.attrs.forEach(attr => attr.uniqValue(instanceObj.get(attr)));
+        instanceObj.setDataset(this);
         this.dataset.push(instanceObj);
         return instanceObj;
     }
     deleteWithMissingClass() {
-        this.dataset = this.dataset.filter(instance => instance.get(this.classAttr) != null);
+        this.dataset = this.dataset.filter(instance => !instance.classIsMissing());
         return this;
     }
 }
