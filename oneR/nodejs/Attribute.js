@@ -1,32 +1,28 @@
 class Attribute {
     constructor(attributeName, attributeValues = String) {
         this.attributeName = attributeName;
-        this.index = -1;
         if (attributeValues === Number) {
             this.type = Attribute.NUMERIC;
-            this.attributeInfo = null;
+            this.values = [];
         } else {
             if (attributeValues === String) {
                 this.type = Attribute.STRING;
-                this.attributeInfo = [];
+                this.values = new Set();
             } else {
                 if (attributeValues instanceof Set) {
                     this.type = Attribute.NOMINAL;
-                    this.attributeInfo = Array.from(attributeValues);
+                    this.values = attributeValues;
                 } else {
                     if ('string' === typeof attributeValues) {
                         let dateFormat = attributeValues;
                         this.type = Attribute.DATE;
-                        this.attributeInfo = new DateAttributeInfo(dateFormat);
+                        this.values = new DateAttributeInfo(dateFormat);
                     } else {
                         throw 'invalid attributeValues' + attributeValues;
                     }
                 }
             }
         }
-    }
-    setIndex(i) {
-        this.index = i;
     }
     isNominal() {
         return this.type === Attribute.NOMINAL;
@@ -40,21 +36,14 @@ class Attribute {
     isDate() {
         return this.type === Attribute.DATE;
     }
-    indexOfValue(attrValue) {
-        return this.attributeInfo.indexOf(attrValue);
+    hasValue(attrValue) {
+        return this.values.has(attrValue);
     }
     addStringValue(string) {
         if (!this.isString()) {
-            return -1;
+            throw this.attributeName + ' is not a string type attribute!';
         } else {
-            let index = this.attributeInfo.indexOf(string);
-            if (~index) {
-                return index;
-            } else {
-                index = this.attributeInfo.length;
-                this.attributeInfo.push(string);
-                return index;
-            }
+            this.values.add(string);
         }
     }
 }

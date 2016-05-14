@@ -4,24 +4,22 @@ class Instances {
         this.relation = relation;
         this.attrs = attrs;
         this.numAttributes = attrs.length;
-        for (let i = 0; i < this.numAttributes; i++) {
-            this.attribute(i).setIndex(i);
-        }
         this.classAttr = null;
         this.classAttrIndex = -1;
         this.dataset = [];
     }
     setClassAttribute(classAttr) {
-        let classAttrIndex = this.attrs.findIndex(attr => attr == classAttr);
-        if (~classAttrIndex) {
-            this.classAttr = this.attrs[classAttrIndex];
-            this.classAttrIndex = classAttrIndex;
-            return this;
+        if (!classAttr.isNominal() && !classAttr.isString()) {
+            throw classAttr + ' must be nominal';
+        } else {
+            let classAttrIndex = this.attrs.findIndex(attr => attr == classAttr);
+            if (~classAttrIndex) {
+                this.classAttr = this.attrs[classAttrIndex];
+                this.classAttrIndex = classAttrIndex;
+                return this;
+            }
+            throw classAttr + ' is not exists';
         }
-        throw new Exception(classAttr + ' is not exists');
-    }
-    attribute(i) {
-        return this.attrs[i];
     }
     addInstance(instance) {
         let instanceObj = new Instance(instance);
@@ -32,6 +30,20 @@ class Instances {
     deleteWithMissingClass() {
         this.dataset = this.dataset.filter(instance => !instance.classIsMissing());
         return this;
+    }
+    checkInstance(instance) {
+        for (let attr of this.attrs) {
+            if (instance.isMissing(attr)) {
+                continue;
+            } else {
+                if (attr.isNominal() || attr.isString()) {
+                    if (!attr.values.has(instance.getAttrValue(attr))) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }
 module.exports = Instances;

@@ -2,67 +2,50 @@ let Attribute = require('./Attribute.js');
 class Instance {
     constructor(obj) {
         this.obj = obj;
-        this.attrValues = [];
     }
     setDataset(dataset) {
         this.dataset = dataset;
-        for (let i = 0; i < this.numAttributes(); i++) {
-            let attr = this.attribute(i);
-            var attrValue = this.obj[attr.attributeName];
-            if (attrValue === null) {
-                this.attrValues[i] = NaN;
-            } else {
-                switch (attr.type) {
-                    case Attribute.NOMINAL:
-                        let index = attr.indexOfValue(attrValue);
-                        if (~index) {
-                            this.attrValues[i] = index;
+        this.attrs = dataset.attrs;
+        this.classAttr = dataset.classAttr;
+        this.numAttributes = dataset.numAttributes;
+        for (let attr of this.attrs) {
+            let attrValue = this.getAttrValue(attr);
+            switch (attr.type) {
+                case Attribute.NOMINAL:
+                    let hasValue = attr.hasValue(attrValue);
+                    if (!hasValue) {
+                        if (this.isMissing(attr)) {
+                            attr.values.add(null);
                         } else {
                             throw 'nominal value not declared in header';
                         }
-                        break;
-                    case Attribute.NUMERIC:
-                        attrValue = Number(attrValue);
-                        if (isNaN(attrValue)) {
-                            throw 'number expected';
-                        } else {
-                            this.attrValues[i] = attrValue;
-                        }
-                        break;
-                    case Attribute.STRING:
-                        this.attrValues[i] = attr.addStringValue(attrValue);
-                        break;
-                }
+                    }
+                    break;
+                case Attribute.NUMERIC:
+                    attrValue = Number(attrValue);
+                    if (!this.isMissing(attr) && isNaN(attrValue)) {
+                        throw 'number expected';
+                    }
+                    break;
+                case Attribute.STRING:
+                    attr.addStringValue(attrValue);
+                    break;
             }
         }
     }
-    dataset() {
-        return this.dataset;
-    }
-    numAttributes() {
-        return this.dataset.numAttributes;
-    }
-    classIndex() {
-        return this.dataset.classAttrIndex;
-    }
-    classAttribute() {
-        return this.dataset.classAttr;
-    }
     classIsMissing() {
-        return this.value(this.classAttribute()) == NaN;
+        return this.isMissing(this.classAttr);
     }
-    attribute(i) {
-        return this.dataset.attribute(i);
-    }
-    value(attr) {
-        if (attr instanceof Attribute) {
-            return this.attrValues[attr.index];
-        } else {
-            return this.attrValues[attr];
-        }
+    isMissing(attr) {
+        let attrValue = this.getAttrValue(attr);
+        return attrValue == null;
     }
     getAttrValue(attr) {
-        return this.obj[attr.attributeName];
+        let attrValue = this.obj[attr.attributeName];
+        return attrValue == null ? null : attrValue;
+    }
+    getClassValue() {
+        return this.getAttrValue(this.classAttr);
     }
 }
 module.exports = Instance;
