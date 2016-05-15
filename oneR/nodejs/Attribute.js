@@ -1,6 +1,7 @@
 class Attribute {
-    constructor(attributeName, attributeValues = String) {
-        this.attributeName = attributeName;
+    constructor(name, attributeValues = String) {
+        this.name = name;
+        this.weight = 1;
         if (attributeValues === Number) {
             this.type = Attribute.NUMERIC;
             this.values = [];
@@ -41,7 +42,7 @@ class Attribute {
     }
     addStringValue(string) {
         if (!this.isString()) {
-            throw this.attributeName + ' is not a string type attribute!';
+            throw this.name + ' is not a string type attribute!';
         } else {
             this.values.add(string);
         }

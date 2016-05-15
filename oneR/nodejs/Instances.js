@@ -1,21 +1,20 @@
 let Instance = require('./Instance.js');
+let Attribute = require('./Attribute.js');
 class Instances {
     constructor(relation, attrs) {
         this.relation = relation;
         this.attrs = attrs;
         this.numAttributes = attrs.length;
         this.classAttr = null;
-        this.classAttrIndex = -1;
         this.dataset = [];
     }
     setClassAttribute(classAttr) {
         if (!classAttr.isNominal() && !classAttr.isString()) {
             throw classAttr + ' must be nominal';
         } else {
-            let classAttrIndex = this.attrs.findIndex(attr => attr == classAttr);
-            if (~classAttrIndex) {
-                this.classAttr = this.attrs[classAttrIndex];
-                this.classAttrIndex = classAttrIndex;
+            let valid = this.attrs.includes(classAttr);
+            if (valid) {
+                this.classAttr = classAttr;
                 return this;
             }
             throw classAttr + ' is not exists';
@@ -23,6 +22,7 @@ class Instances {
     }
     addInstance(instance) {
         let instanceObj = new Instance(instance);
+        this.checkInstance(instanceObj);
         instanceObj.setDataset(this);
         this.dataset.push(instanceObj);
         return instanceObj;
@@ -33,17 +33,29 @@ class Instances {
     }
     checkInstance(instance) {
         for (let attr of this.attrs) {
-            if (instance.isMissing(attr)) {
-                continue;
-            } else {
-                if (attr.isNominal() || attr.isString()) {
-                    if (!attr.values.has(instance.getAttrValue(attr))) {
-                        return false;
+            let attrValue = instance.getAttrValue(attr);
+            switch (attr.type) {
+                case Attribute.NOMINAL:
+                    let hasValue = attr.hasValue(attrValue);
+                    if (!hasValue) {
+                        if (instance.isMissing(attr)) {
+                            attr.values.add(null);
+                        } else {
+                            throw 'nominal value not declared in header';
+                        }
                     }
-                }
+                    break;
+                case Attribute.NUMERIC:
+                    attrValue = Number(attrValue);
+                    if (!instance.isMissing(attr) && isNaN(attrValue)) {
+                        throw 'number expected';
+                    }
+                    break;
+                case Attribute.STRING:
+                    attr.addStringValue(attrValue);
+                    break;
             }
         }
-        return true;
     }
 }
 module.exports = Instances;
