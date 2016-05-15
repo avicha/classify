@@ -14,12 +14,17 @@ class Attribute {
                     this.type = Attribute.NOMINAL;
                     this.values = attributeValues;
                 } else {
-                    if ('string' === typeof attributeValues) {
-                        let dateFormat = attributeValues;
-                        this.type = Attribute.DATE;
-                        this.values = new DateAttributeInfo(dateFormat);
+                    if (attributeValues === Boolean) {
+                        this.type = Attribute.NOMINAL;
+                        this.values = new Set([true, false]);
                     } else {
-                        throw 'invalid attributeValues' + attributeValues;
+                        if ('string' === typeof attributeValues) {
+                            let dateFormat = attributeValues;
+                            this.type = Attribute.DATE;
+                            this.values = new DateAttributeInfo(dateFormat);
+                        } else {
+                            throw 'invalid attributeValues' + attributeValues;
+                        }
                     }
                 }
             }
