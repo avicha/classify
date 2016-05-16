@@ -119,6 +119,9 @@ let testInstance = new Instance({
     humidity: 82,
     windy: false
 });
+classifer.setOptions({
+    minBucketSize: 3
+});
 //根据训练集建立分类器，得出分类规则
 classifer.buildClassifier(instances);
 console.log(classifer.classifyInstance(testInstance));
